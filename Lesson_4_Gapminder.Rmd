@@ -1,0 +1,66 @@
+---
+title: "R Notebook"
+output: html_notebook
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+---
+
+ 
+
+```{r}
+# Your task is to download a data set of your choice from Gapminder
+# and create 2-5 plots that make use of the techniques from Lesson 3.
+
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+
+# Fertility rate data worldwide 1799-2100
+
+data <- read.csv('children_per_woman_total_fertility.csv', header = T, row.names = 1, check.names =  F)
+
+# Clean up data
+
+data$country <- rownames(data)
+rownames(data) <- NULL
+data <- melt(data = data, id='country', variable.name='year', value.name = 'rate')
+data$year <- as.integer(levels(data$year))
+data <- data %>% arrange(year)
+
+# Select a sample of countries
+
+countries <- c("Japan", "United States", "Gabon", "Djibouti", "Brazil", "Canada", "Pakistan", "United Kingdom", "China", "Peru")
+
+data.countries <- data %>% filter(country %in% countries)
+
+ggplot(data.countries, aes(x=country, y=rate, color = country)) + geom_boxplot(na.rm=T) 
+
+
+
+```
+
+```{r}
+countries <- c("Japan", "United States", "Gabon", "Djibouti", "Brazil", "Canada", "Pakistan", "United Kingdom", "China", "Peru")
+
+data.countries <- data %>% filter(country %in% countries)
+
+qplot( x=rate, data = data_2021, color = I("black"), fill = I("blue")) + xlab("Birth Rate per Woman") + ylab("Count") 
+
+```
+```{r}
+century_data <- data.countries %>% filter(year>1899 & year < 2001)
+qplot(x=country, y = rate, data = century_data, geom="boxplot", color = country, rm.na = TRUE) + xlab("Country") + ylab("Birth Rate Change 20th Century")
+
+```
+```{r}
+# Country specific data for China
+china_data <- data %>% filter(country == "China")
+china_data <- china_data %>% filter(year > 1899 & year < 2001)
+
+qplot(x=year, y = rate, data=china_data, color=I("black")) + geom_bar(stat="identity")
+
+```
+
